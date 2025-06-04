@@ -1,0 +1,113 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Travel Destinations</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        main {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1, h2 {
+            color: #1a237e;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            margin: 10px 0;
+        }
+        ul {
+            list-style-type: disc;
+            padding-left: 20px;
+        }
+        nav {
+            margin-bottom: 20px;
+        }
+        a {
+            color: #0288d1;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="https://www.lonelyplanet.com" target="_blank" rel="noopener noreferrer">Explore Lonely Planet</a>
+        </nav>
+    </header>
+    <main>
+        <h1>My Favorite Travel Destinations</h1>
+        <p>Discover some amazing places to visit around the world.</p>
+        
+        <h2>Top Destinations</h2>
+        <ul>
+            <li>Paris: Known for the Eiffel Tower and rich culture.</li>
+            <li>Tokyo: A vibrant city blending tradition and modernity.</li>
+            <li>New Zealand: Stunning landscapes and adventure sports.</li>
+        </ul>
+
+        <h2>Destination Images</h2>
+        <figure>
+            <img src="https://via.placeholder.com/800x400?text=Paris" alt="Eiffel Tower in Paris at sunset">
+            <figcaption>The iconic Eiffel Tower.</figcaption>
+        </figure>
+        <figure>
+            <img src="https://via.placeholder.com/800x400?text=Tokyo" alt="Busy Tokyo street with neon lights">
+            <figcaption>Tokyo's vibrant cityscape.</figcaption>
+        </figure>
+        <figure>
+            <img src="https://via.placeholder.com/800x400?text=New+Zealand" alt="New Zealand mountain landscape">
+            <figcaption>New Zealand's scenic beauty.</figcaption>
+        </figure>
+    </main>
+</body>
+</html>
