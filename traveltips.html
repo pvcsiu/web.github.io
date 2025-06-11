@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel Tips - My Travel Destinations</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex));
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+    </script>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="./index.html">Home</a></li>
+                <li><a href="./travel_tips.html">Travel Tips</a></li>
+                <li><a href="./about.html">About</a></li>
+                <li><a href="https://www.lonelyplanet.com" target="_blank" rel="noopener noreferrer">Explore Lonely Planet</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <h1>Travel Tips</h1>
+        <p>Make your travel experience smooth and enjoyable with these practical tips.</p>
+        
+        <h2>Essential Travel Advice</h2>
+        <ul>
+            <li>Pack Light: Choose versatile clothing to save space and reduce baggage fees.</li>
+            <li>Learn Basic Phrases: Knowing simple local phrases can enhance your experience.</li>
+            <li>Backup Documents: Keep digital copies of your passport and itinerary.</li>
+        </ul>
+
+        <h2>Recommended Resources</h2>
+        <p>Explore these sites for more travel planning ideas:</p>
+        <ul>
+            <li><a href="https://www.ricksteves.com" target="_blank" rel="noopener noreferrer">Rick Steves' Travel Guides</a></li>
+            <li><a href="https://www.nomadicmatt.com" target="_blank" rel="noopener noreferrer">Nomadic Matt's Budget Travel Tips</a></li>
+        </ul>
+    </main>
+    <footer>
+        <p>© 2025 My Travel Destinations. All rights reserved.</p>
+    </footer>
+</body>
+</html>
